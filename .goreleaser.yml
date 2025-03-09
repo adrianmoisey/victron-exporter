@@ -1,67 +1,77 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
 
-builds:
-- goos:
-    - linux
-    - darwin
-    - windows
-  goarch:
-    - amd64
-    - arm
-    - arm64
-  goarm:
-    - 6
-    - 7
-  env:
-    - CGO_ENABLED=0
-  ignore:
-    - goos: windows
-      goarch: arm
-    - goos: windows
-      goarch: arm64
-    - goos: darwin
-      goarch: arm
-    - goos: darwin
-      goarch: arm
-    - goos: linux
-      goarch: arm
-      goarm: 7
+project_name: victron-exporter
 
+builds:
+  - id: victron-exporter
+    main: ./cmd/victron-exporter
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 6
+      - 7
+    env:
+      - CGO_ENABLED=0
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: windows
+        goarch: arm64
+      - goos: darwin
+        goarch: arm
+      - goos: linux
+        goarch: arm
+        goarm: 7
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
 
 dockers:
-  - image_templates:
-    - "ghcr.io/suprememoocow/victron-exporter:latest-amd64"
-    - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-amd64"
+  - id: victron-exporter-amd64
+    image_templates:
+      - "ghcr.io/suprememoocow/victron-exporter:latest-amd64"
+      - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-amd64"
+    dockerfile: Dockerfile
     goos: linux
     goarch: amd64
-  - image_templates:
-    - "ghcr.io/suprememoocow/victron-exporter:latest-arm64"
-    - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-arm64"
+  - id: victron-exporter-arm64
+    image_templates:
+      - "ghcr.io/suprememoocow/victron-exporter:latest-arm64"
+      - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-arm64"
+    dockerfile: Dockerfile
     goos: linux
     goarch: arm64
 
 docker_manifests:
   - name_template: "ghcr.io/suprememoocow/victron-exporter:latest"
     image_templates:
-    - "ghcr.io/suprememoocow/victron-exporter:latest-amd64"
-    - "ghcr.io/suprememoocow/victron-exporter:latest-arm64"
-
+      - "ghcr.io/suprememoocow/victron-exporter:latest-amd64"
+      - "ghcr.io/suprememoocow/victron-exporter:latest-arm64"
   - name_template: "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}"
     image_templates:
-    - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-amd64"
-    - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-arm64"
-
-checksum:
-  name_template: 'checksums.txt'
-
-snapshot:
-  name_template: "{{ .Tag }}-next"
-
-changelog:
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
+      - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-amd64"
+      - "ghcr.io/suprememoocow/victron-exporter:{{ .Tag }}-arm64"
